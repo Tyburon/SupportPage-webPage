@@ -8,6 +8,10 @@ export const Header = styled.header`
   background: #e4f9ff;
 `;
 
+export const Report = styled.div`
+
+`;
+
 export const HeaderContent = styled.div`
   max-width: 1120px;
   margin: 0 auto;
