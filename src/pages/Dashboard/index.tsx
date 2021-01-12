@@ -1,5 +1,5 @@
+/* eslint-disable camelcase */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Typography from '@material-ui/core/Typography';
 
@@ -10,6 +10,7 @@ import CardContent from '@material-ui/core/CardContent';
 
 import { FiPower } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
+import Button from '@material-ui/core/Button';
 import {
   Report,
   Container,
@@ -18,24 +19,34 @@ import {
   Profile,
   MenuList,
   MenuListItem,
+  InsideCard,
+  CardsContainer,
 } from './styles';
-
-interface Report {
-  id: string;
-  problem_id: string;
-  user_id: string;
-  employe_id: string;
-  description: string;
-  status: boolean;
-}
 
 import logoImg from '../../assets/logo.png';
 import { useAuth } from '../../hooks/auth';
 import api from '../../services/api';
 
+interface Report {
+  id: string;
+  problem_id: string;
+  user_id: string;
+  created_at: string;
+  employe_id: string;
+  description: string;
+  status: boolean;
+  userReports: {
+    name: string;
+  };
+  reportProblem: {
+    name: string;
+  };
+}
+
 const useStyles = makeStyles({
   root: {
-    minWidth: 500,
+    minWidth: 300,
+    maxWidth: 650,
   },
   bullet: {
     display: 'inline-block',
@@ -54,7 +65,7 @@ const Dashboard: React.FC = () => {
   const classes = useStyles();
   const bull = <span className={classes.bullet}>•</span>;
   const { signOut, user } = useAuth();
-  const [reports, setReports] = useState<Report>([]);
+  const [reports, setReports] = useState<Report[]>([]);
 
   useEffect(() => {
     api
@@ -64,9 +75,9 @@ const Dashboard: React.FC = () => {
         },
       })
       .then(response => {
-        setReports(response);
+        setReports(response.data);
       });
-  }, []);
+  }, [user.id]);
 
   return (
     <>
@@ -87,7 +98,7 @@ const Dashboard: React.FC = () => {
                 <Link to="/">Chamados</Link>
               </MenuListItem>
               <MenuListItem>
-                <Link to="/">Abrir Chamado</Link>
+                <Link to="/report">Abrir Chamado</Link>
               </MenuListItem>
             </MenuList>
 
@@ -96,32 +107,44 @@ const Dashboard: React.FC = () => {
             </button>
           </HeaderContent>
         </Header>
-
-        {reports.map(report => (
-              <Report key={report.id}>
-                <Card className={classes.root}>
-                <CardContent>
-                  <Typography className={classes.title} color="textSecondary" gutterBottom>
-                    {report.problem_id}
+        <CardsContainer>
+          {reports.map(report => (
+            <Report key={report.id}>
+              <Card className={classes.root}>
+                <CardContent style={{ flexDirection: 'column' }}>
+                  <Typography
+                    className={classes.title}
+                    color="textSecondary"
+                    gutterBottom
+                  >
+                    {report.created_at}
                   </Typography>
-                  <Typography variant="h5" component="h2">
-                    be{bull}nev{bull}o{bull}lent
-                  </Typography>
-                  <Typography className={classes.pos} color="textSecondary">
-                    adjective
-                  </Typography>
-                  <Typography variant="body2" component="p">
-                    well meaning and kindly.
-                    <br />
-                    {'"a benevolent smile"'}
-                  </Typography>
+                  <InsideCard>
+                    <Typography variant="h5" component="h2">
+                      {report.userReports.name}
+                    </Typography>
+                    <Typography variant="h5" component="h2">
+                      {report.reportProblem.name}
+                    </Typography>
+                    {report.status === true && (
+                      <Typography variant="h5" component="h2">
+                        Status: Encerrado
+                      </Typography>
+                    )}
+                    {report.status === false && (
+                      <Typography variant="h5" component="h2">
+                        Status: Aberto
+                      </Typography>
+                    )}
+                  </InsideCard>
                 </CardContent>
                 <CardActions>
-                  <Button size="small">Learn More</Button>
+                  <Button size="small">Editar</Button>
                 </CardActions>
               </Card>
             </Report>
-        ))}
+          ))}
+        </CardsContainer>
       </Container>
     </>
   );

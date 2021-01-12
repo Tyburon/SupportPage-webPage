@@ -8,10 +8,6 @@ export const Header = styled.header`
   background: #e4f9ff;
 `;
 
-export const Report = styled.div`
-
-`;
-
 export const HeaderContent = styled.div`
   max-width: 1120px;
   margin: 0 auto;
@@ -422,5 +418,29 @@ export const StartSchedule = styled.div`
     margin-left: 24px;
     color: #0a122a;
     font-size: 20px;
+  }
+`;
+
+export const InsideCard = styled.div`
+  margin: 0 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+`;
+export const Report = styled.div``;
+
+export const CardsContainer = styled.div`
+  margin-top: 40px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+
+  div {
+    margin: auto;
+  }
+
+  div + div {
+    margin-top: 16px;
   }
 `;
