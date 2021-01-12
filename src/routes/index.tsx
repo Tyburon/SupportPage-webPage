@@ -7,6 +7,7 @@ import SignIn from '../pages/SingIn';
 import SignUp from '../pages/SignUp';
 import Dashboard from '../pages/Dashboard';
 import NewReport from '../pages/NewReport';
+import EditReport from '../pages/EditReport';
 
 const Routes: React.FC = () => (
   <Switch>
@@ -14,6 +15,7 @@ const Routes: React.FC = () => (
     <Route path="/signup" component={SignUp} />
     <Route path="/dashboard" component={Dashboard} isPrivate />
     <Route path="/report" component={NewReport} isPrivate />
+    <Route path="/editreport" component={EditReport} isPrivate />
   </Switch>
 );
 

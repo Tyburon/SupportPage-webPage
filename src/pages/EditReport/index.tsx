@@ -37,33 +37,39 @@ interface ReportFormData {
   status: boolean;
 }
 
-interface Problem {
+interface Report {
   id: string;
-  name: string;
+  problem_id: string;
+  user_id: string;
+  created_at: string;
+  employe_id: string;
+  description: string;
+  status: boolean;
+  userReports: {
+    name: string;
+  };
+  reportProblem: {
+    name: string;
+  };
 }
 
-interface User {
-  id: string;
-  name: string;
-}
 
 const NewReport: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
   const { signOut, user } = useAuth();
-  const [problems, setProblems] = useState<Problem[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
+  const [problems, setProblems] = useState<Report>();
+  const { data } = (props.location && props.location.state);
 
   useEffect(() => {
-    api.get<Problem[]>('/problems').then(response => {
+    api.get<Report>('/reports/report', {
+      params: {
+        employe_id: data.report_id,
+      },
+    }).then((response: { data: Report; }) => {
       setProblems(response.data);
     });
   }, []);
 
-  useEffect(() => {
-    api.get<User[]>('/users').then(response => {
-      setUsers(response.data);
-    });
-  }, []);
 
   const handleSubmit = useCallback(async (data: ReportFormData) => {
     try {
@@ -143,9 +149,9 @@ const NewReport: React.FC = () => {
               <Autocomplete
                 id="problem"
                 options={problems}
-                getOptionLabel={option => option.name}
+                getOptionLabel={(option: { name: any; }) => option.name}
                 style={{ width: 300 }}
-                renderInput={params => (
+                renderInput={(params: unknown) => (
                   <TextField {...params} label="Problema" variant="outlined" />
                 )}
               />
@@ -153,9 +159,9 @@ const NewReport: React.FC = () => {
               <Autocomplete
                 id="name"
                 options={users}
-                getOptionLabel={option => (option.name + option.id)}
+                getOptionLabel={(option: { name: any; id: any; }) => (option.name + option.id)}
                 style={{ width: 300 }}
-                renderInput={params => (
+                renderInput={(params: unknown) => (
                   <TextField {...params} label="Usuário" variant="outlined" />
                 )}
               />

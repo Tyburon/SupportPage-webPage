@@ -63,7 +63,6 @@ const useStyles = makeStyles({
 
 const Dashboard: React.FC = () => {
   const classes = useStyles();
-  const bull = <span className={classes.bullet}>•</span>;
   const { signOut, user } = useAuth();
   const [reports, setReports] = useState<Report[]>([]);
 
@@ -139,7 +138,13 @@ const Dashboard: React.FC = () => {
                   </InsideCard>
                 </CardContent>
                 <CardActions>
-                  <Button size="small">Editar</Button>
+                  <Link to={{
+                    pathname: "/editreport",
+                    data: report.id // your data array of objects
+                  }}>
+                    <Button size="small">Editar</Button>
+                  </Link>
+
                 </CardActions>
               </Card>
             </Report>
