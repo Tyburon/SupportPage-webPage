@@ -106,8 +106,6 @@ export const Content = styled.main`
   display: flex;
 `;
 
-
-
 export const Section = styled.section`
   margin-top: 48px;
 

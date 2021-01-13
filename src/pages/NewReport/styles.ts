@@ -108,7 +108,6 @@ export const Content = styled.main`
   display: flex;
 `;
 
-
 export const Section = styled.section`
   margin-top: 48px;
 
@@ -149,16 +148,28 @@ export const StartSchedule = styled.div`
 `;
 
 export const FormContent = styled.div`
-  width: 650px;
+  max-width: 650px;
+  height: 500px;
   border-radius: 20px;
   background-color: #fafafa;
   display: flex;
   flex-direction: column;
 
+  flex: 1;
   strong {
     margin-left: 24px;
     color: #0a122a;
     font-size: 20px;
+  }
+
+  form {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+
+    div + div {
+      margin-top: 20px;
+    }
   }
 `;
 

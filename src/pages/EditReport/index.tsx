@@ -10,9 +10,8 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
-
 import { FiPower } from 'react-icons/fi';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useParams } from 'react-router-dom';
 import getValidationErrors from '../../utils/getValidationErrors';
 import {
   FormContent,
@@ -22,7 +21,7 @@ import {
   Profile,
   MenuList,
   MenuListItem,
-  FormContainer
+  FormContainer,
 } from './styles';
 
 import logoImg from '../../assets/logo.png';
@@ -35,6 +34,11 @@ interface ReportFormData {
   employe_id: string;
   description: string;
   status: boolean;
+}
+
+interface Problem {
+  id: string;
+  name: string;
 }
 
 interface Report {
@@ -53,23 +57,33 @@ interface Report {
   };
 }
 
+let report_id: string;
 
-const NewReport: React.FC = () => {
+const NewReport: React.FC = props => {
   const formRef = useRef<FormHandles>(null);
   const { signOut, user } = useAuth();
-  const [problems, setProblems] = useState<Report>();
-  const { data } = (props.location && props.location.state);
+  const [reports, setReports] = useState<Report>();
+  const [problems, setProblems] = useState<Problem[]>([]);
+
+  report_id = useParams<string>();
 
   useEffect(() => {
-    api.get<Report>('/reports/report', {
-      params: {
-        employe_id: data.report_id,
-      },
-    }).then((response: { data: Report; }) => {
+    api
+      .get<Report>('/reports/report', {
+        params: {
+          report_id,
+        },
+      })
+      .then((response: { data: Report }) => {
+        setReports(response.data);
+      });
+  }, []);
+
+  useEffect(() => {
+    api.get<Problem[]>('/problems').then(response => {
       setProblems(response.data);
     });
   }, []);
-
 
   const handleSubmit = useCallback(async (data: ReportFormData) => {
     try {
@@ -149,24 +163,27 @@ const NewReport: React.FC = () => {
               <Autocomplete
                 id="problem"
                 options={problems}
-                getOptionLabel={(option: { name: any; }) => option.name}
+                getOptionLabel={(option: { name: any }) => option.name}
                 style={{ width: 300 }}
                 renderInput={(params: unknown) => (
-                  <TextField {...params} label="Problema" variant="outlined" />
-                )}
-              />
-
-              <Autocomplete
-                id="name"
-                options={users}
-                getOptionLabel={(option: { name: any; id: any; }) => (option.name + option.id)}
-                style={{ width: 300 }}
-                renderInput={(params: unknown) => (
-                  <TextField {...params} label="Usuário" variant="outlined" />
+                  <TextField
+                    {...params}
+                    name="problem_id"
+                    label="Problema"
+                    variant="outlined"
+                  />
                 )}
               />
 
               <TextField
+                name="cliente"
+                id="cliente"
+                label="Mensagem"
+                variant="outlined"
+              />
+
+              <TextField
+                name="description"
                 id="description"
                 label="Descrição"
                 placeholder="Placeholder"
@@ -174,7 +191,12 @@ const NewReport: React.FC = () => {
                 variant="outlined"
               />
 
-              <TextField id="message" label="Mensagem" variant="outlined" />
+              <TextField
+                name="message"
+                id="message"
+                label="Mensagem"
+                variant="outlined"
+              />
 
               <Button type="submit" variant="contained" color="primary">
                 Abrir Chamado

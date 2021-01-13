@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import Content from '@material-ui/core/Container';
+import LinkedStateMixin from 'react-addons-linked-state-mixin';
 import { FormHandles } from '@unform/core';
 import { Form } from '@unform/web';
 import * as Yup from 'yup';
@@ -9,7 +9,6 @@ import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
-
 
 import { FiPower } from 'react-icons/fi';
 import { Link, useHistory } from 'react-router-dom';
@@ -22,7 +21,7 @@ import {
   Profile,
   MenuList,
   MenuListItem,
-  FormContainer
+  FormContainer,
 } from './styles';
 
 import logoImg from '../../assets/logo.png';
@@ -34,7 +33,6 @@ interface ReportFormData {
   user_id: string;
   employe_id: string;
   description: string;
-  status: boolean;
 }
 
 interface Problem {
@@ -47,11 +45,36 @@ interface User {
   name: string;
 }
 
+const useStyles = makeStyles(theme => ({
+  paper: {
+    marginTop: theme.spacing(8),
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  avatar: {
+    margin: theme.spacing(1),
+    backgroundColor: theme.palette.secondary.main,
+  },
+  form: {
+    width: '100%', // Fix IE 11 issue.
+    marginTop: theme.spacing(3),
+  },
+  submit: {
+    margin: theme.spacing(3, 0, 2),
+  },
+}));
+
 const NewReport: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
   const { signOut, user } = useAuth();
   const [problems, setProblems] = useState<Problem[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [userId, setUserId] = useState(null);
+  const [problemId, setProblemId] = useState<Problem>();
+  const [description, setDescription] = useState(null);
+
+  const classes = useStyles();
 
   useEffect(() => {
     api.get<Problem[]>('/problems').then(response => {
@@ -65,42 +88,48 @@ const NewReport: React.FC = () => {
     });
   }, []);
 
-  const handleSubmit = useCallback(async (data: ReportFormData) => {
-    try {
-      formRef.current?.setErrors({});
+  const handleSubmit = useCallback(
+    async data => {
+      try {
+        console.log('Data: ');
+        console.log(description);
 
-      const schema = Yup.object().shape({
-        problem: Yup.string().required('Problema obrigatório'),
-        name: Yup.string().required('Nome obrigatório'),
-        description: Yup.string().required('Nome obrigatório'),
-        message: Yup.string().required('Nome obrigatório'),
-      });
+        // const schema = Yup.object().shape({
+        //   problem: Yup.string().required('Problema obrigatório'),
+        //   name: Yup.string().required('Nome obrigatório'),
+        //   description: Yup.string().required('Descrição obrigatório'),
+        //   message: Yup.string(),
+        // });
 
-      await schema.validate(data, {
-        abortEarly: false,
-      });
+        // await schema.validate(data, {
+        //   abortEarly: false,
+        // });
 
-      const { problem_id, user_id, employe_id, description, status } = data;
+        const formData = {
+          problem_id: data.problem_id,
+          user_id: data.user_id,
+          employe_id: user.id,
+          description: data.description,
+          status: false,
+        };
 
-      const formData = {
-        problem_id,
-        user_id,
-        employe_id: user.id,
-        description,
-        status: false,
-      };
+        console.log(formData);
 
-      const response = await api.put('/report', formData);
+        console.log('passouaqui');
+        await api.put('/report', formData);
+        console.log('passouaqui');
 
-      // history.push('/dashboard');
-    } catch (err) {
-      if (err instanceof Yup.ValidationError) {
-        const errors = getValidationErrors(err);
+        // history.push('/dashboard');
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(err);
 
-        formRef.current?.setErrors(errors);
+          formRef.current?.setErrors(errors);
+        }
       }
-    }
-  }, []);
+    },
+    [user.id],
+  );
 
   return (
     <>
@@ -121,7 +150,7 @@ const NewReport: React.FC = () => {
                 <Link to="/">Chamados</Link>
               </MenuListItem>
               <MenuListItem>
-                <Link to="/">Abrir Chamado</Link>
+                <Link to="/report">Abrir Chamado</Link>
               </MenuListItem>
             </MenuList>
 
@@ -132,35 +161,42 @@ const NewReport: React.FC = () => {
         </Header>
         <FormContainer>
           <FormContent>
-            <Form
-              ref={formRef}
-              // initialData={{
-              //   name: user.name,
-              //   email: user.email,
-              // }}
-              onSubmit={handleSubmit}
-            >
+            <Form ref={formRef} onSubmit={handleSubmit}>
               <Autocomplete
                 id="problem"
                 options={problems}
                 getOptionLabel={option => option.name}
                 style={{ width: 300 }}
+                onChange={(event: any, newValue: string | null) => {
+                  setValue(newValue);
+                }}
                 renderInput={params => (
-                  <TextField {...params} label="Problema" variant="outlined" />
+                  <TextField
+                    {...params}
+                    name="problem_id"
+                    label="Problema"
+                    variant="outlined"
+                  />
                 )}
               />
 
               <Autocomplete
                 id="name"
                 options={users}
-                getOptionLabel={option => (option.name + option.id)}
+                getOptionLabel={option => `${option.name} -  id: ${option.id}`}
                 style={{ width: 300 }}
                 renderInput={params => (
-                  <TextField {...params} label="Usuário" variant="outlined" />
+                  <TextField
+                    {...params}
+                    name="user_id"
+                    label="Usuário"
+                    variant="outlined"
+                  />
                 )}
               />
 
               <TextField
+                name="description"
                 id="description"
                 label="Descrição"
                 placeholder="Placeholder"
@@ -168,9 +204,19 @@ const NewReport: React.FC = () => {
                 variant="outlined"
               />
 
-              <TextField id="message" label="Mensagem" variant="outlined" />
+              <TextField
+                name="message"
+                id="message"
+                label="Mensagem"
+                variant="outlined"
+              />
 
-              <Button type="submit" variant="contained" color="primary">
+              <Button
+                className={classes.submit}
+                type="submit"
+                variant="contained"
+                color="primary"
+              >
                 Abrir Chamado
               </Button>
             </Form>

@@ -138,13 +138,9 @@ const Dashboard: React.FC = () => {
                   </InsideCard>
                 </CardContent>
                 <CardActions>
-                  <Link to={{
-                    pathname: "/editreport",
-                    data: report.id // your data array of objects
-                  }}>
+                  <Link to={`/editreport/${report.id}`}>
                     <Button size="small">Editar</Button>
                   </Link>
-
                 </CardActions>
               </Card>
             </Report>
